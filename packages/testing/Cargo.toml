@@ -13,4 +13,4 @@ edition = "2021"
 rand = "0.8"
 cosmwasm-std = { version = "1.0.0" }
 voting = { path = "../voting", version = "*" }
-cw-multi-test = { version = "0.13" }
+cw-multi-test = { version = "0.15.0" }
