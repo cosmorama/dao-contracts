@@ -1,6 +1,6 @@
 [package]
 name = "cw20-balance-voting"
-version = "0.1.0"
+version = "1.1.0"
 authors = ["Zeke Medley <zekemedley@gmail.com>"]
 edition = "2018"
 
@@ -38,9 +38,9 @@ cw-utils = "0.13"
 schemars = "0.8"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 thiserror = { version = "1.0" }
-cw-core-macros = { version = "0.1.0", path = "../../packages/cw-core-macros" }
-cw-core-interface = { version = "0.1.0", path = "../../packages/cw-core-interface" }
-cw20-base = {  version = "0.13", features = ["library"] }
+cw-core-macros = { version = "1.1.0", path = "../../packages/cw-core-macros" }
+cw-core-interface = { version = "1.1.0", path = "../../packages/cw-core-interface" }
+cw20-base = { version = "0.13", features = ["library"] }
 
 [dev-dependencies]
 cosmwasm-schema = { version = "1.0.0" }

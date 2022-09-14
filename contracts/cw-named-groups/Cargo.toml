@@ -1,7 +1,10 @@
 [package]
 name = "cw-named-groups"
-version = "0.1.0"
-authors = ["janitachalam <janitachalam@gmail.com>", "Noah Saso <noahsaso@gmail.com>"]
+version = "1.1.0"
+authors = [
+  "janitachalam <janitachalam@gmail.com>",
+  "Noah Saso <noahsaso@gmail.com>",
+]
 edition = "2018"
 
 exclude = [

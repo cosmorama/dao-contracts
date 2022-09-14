@@ -1,6 +1,6 @@
 [package]
 name = "testing"
-version = "0.1.0"
+version = "1.1.0"
 edition = "2021"
 
 # This crate depends on multi-test and rand. These are not features in
@@ -13,4 +13,4 @@ edition = "2021"
 rand = "0.8"
 cosmwasm-std = { version = "1.0.0" }
 voting = { path = "../voting", version = "*" }
-cw-multi-test = {  version = "0.13" }
+cw-multi-test = { version = "0.13" }

@@ -1,6 +1,6 @@
 [package]
 name = "cw20-stake"
-version = "0.2.6"
+version = "1.1.0"
 authors = ["Ben2x4 <Ben2x4@tutanota.com>"]
 edition = "2018"
 license = "Apache-2.0"
@@ -22,7 +22,7 @@ cw-storage-plus = { version = "0.13" }
 cw-controllers = "0.13"
 cw20 = { version = "0.13" }
 cw-utils = { version = "0.13" }
-cw20-base = {  version = "0.13", features = ["library"] }
+cw20-base = { version = "0.13", features = ["library"] }
 cw2 = "0.13"
 schemars = "0.8.8"
 serde = { version = "1.0.132", default-features = false, features = ["derive"] }
@@ -30,5 +30,5 @@ thiserror = { version = "1.0.30" }
 
 [dev-dependencies]
 cosmwasm-schema = { version = "1.0.0" }
-cw-multi-test = {  version = "0.13" }
-anyhow = { version = "1.0.51"}
+cw-multi-test = { version = "0.13" }
+anyhow = { version = "1.0.51" }
