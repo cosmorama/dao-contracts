@@ -21,8 +21,8 @@ use crate::{
     query::ProposalListResponse,
     query::{ProposalResponse, VoteInfo, VoteListResponse, VoteResponse},
     state::{
-        get_deposit_msg, get_return_deposit_msg, Ballot, Config, BALLOTS, CONFIG, PROPOSALS,
-        PROPOSAL_COUNT, PROPOSAL_HOOKS, VOTE_HOOKS,
+        get_deposit_msg, get_return_deposit_msg, Ballot, Config, Executor, BALLOTS, CONFIG,
+        PROPOSALS, PROPOSAL_COUNT, PROPOSAL_HOOKS, VOTE_HOOKS,
     },
     utils::{get_total_power, get_voting_power, validate_voting_period},
 };
@@ -62,6 +62,7 @@ pub fn instantiate(
         dao: dao.clone(),
         deposit_info,
         allow_revoting: msg.allow_revoting,
+        executor: msg.executor,
     };
 
     // Initialize proposal count to zero so that queries return zero
@@ -98,6 +99,7 @@ pub fn execute(
             allow_revoting,
             dao,
             deposit_info,
+            executor,
         } => execute_update_config(
             deps,
             info,
@@ -108,6 +110,7 @@ pub fn execute(
             allow_revoting,
             dao,
             deposit_info,
+            executor,
         ),
         ExecuteMsg::AddProposalHook { address } => {
             execute_add_proposal_hook(deps, env, info, address)
@@ -436,6 +439,7 @@ pub fn execute_update_config(
     allow_revoting: bool,
     dao: String,
     deposit_info: Option<DepositInfo>,
+    executor: Executor,
 ) -> Result<Response, ContractError> {
     let config = CONFIG.load(deps.storage)?;
 
@@ -463,6 +467,7 @@ pub fn execute_update_config(
             allow_revoting,
             dao,
             deposit_info,
+            executor,
         },
     )?;
 

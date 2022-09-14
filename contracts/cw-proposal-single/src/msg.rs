@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use cw_core_macros::govmod_query;
 use voting::Threshold;
 
+use crate::state::Executor;
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct InstantiateMsg {
     /// The threshold a proposal must reach to complete.
@@ -32,6 +34,8 @@ pub struct InstantiateMsg {
     /// proposal. None if there is no deposit requirement, Some
     /// otherwise.
     pub deposit_info: Option<DepositInfo>,
+    /// Specifies who is able to execute proposals
+    pub executor: Executor,
 }
 
 /// Information about the token to use for proposal deposits.
@@ -126,6 +130,8 @@ pub enum ExecuteMsg {
         /// Information about the deposit required to make a
         /// proposal. None if no deposit, Some otherwise.
         deposit_info: Option<DepositInfo>,
+        /// Specifies who is able to execute proposals
+        executor: Executor,
     },
     AddProposalHook {
         address: String,

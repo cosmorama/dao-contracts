@@ -11,6 +11,7 @@ use voting::{Threshold, Vote};
 use crate::{
     msg::{DepositInfo, DepositToken},
     proposal::Proposal,
+    ContractError,
 };
 
 /// Counterpart to the `DepositInfo` struct which has been processed.
@@ -43,7 +44,7 @@ pub struct Config {
     /// If set to true only members may execute passed
     /// proposals. Otherwise, any address may execute a passed
     /// proposal.
-    pub only_members_execute: bool,
+    pub only_members_execute: bool, // TODO: remove?
     /// Allows changing votes before the proposal expires. If this is
     /// enabled proposals will not be able to complete early as final
     /// vote information is not known until the time of proposal
@@ -55,6 +56,24 @@ pub struct Config {
     /// Information about the depost required to create a
     /// proposal. None if no deposit is required, Some otherwise.
     pub deposit_info: Option<CheckedDepositInfo>,
+    /// Specifies who is able to execute proposals
+    pub executor: Executor,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+pub enum Executor {
+    Only(Addr),
+    Anyone,
+}
+
+impl Executor {
+    /// Checks whether the given sender is authorized to execute a proposal
+    pub fn authorize(&self, sender: &Addr) -> Result<(), ContractError> {
+        match self {
+            Executor::Only(addr) if addr != sender => Err(ContractError::Unauthorized {}),
+            Executor::Only(_) | Executor::Anyone => Ok(()),
+        }
+    }
 }
 
 /// A vote cast for a proposal.
