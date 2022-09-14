@@ -11,6 +11,7 @@ use voting::{Threshold, Vote};
 use crate::{
     msg::{DepositInfo, DepositToken},
     proposal::Proposal,
+    utils::get_voting_power,
     ContractError,
 };
 
@@ -62,15 +63,27 @@ pub struct Config {
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub enum Executor {
+    /// Only the specified address can execute approved proposals
     Only(Addr),
+    /// All members can execute approved proposals
+    Members,
+    /// Anyone can execute approved proposals
     Anyone,
 }
 
 impl Executor {
     /// Checks whether the given sender is authorized to execute a proposal
-    pub fn authorize(&self, sender: &Addr) -> Result<(), ContractError> {
+    pub fn authorize(&self, deps: Deps, dao: Addr, sender: Addr) -> Result<(), ContractError> {
         match self {
-            Executor::Only(addr) if addr != sender => Err(ContractError::Unauthorized {}),
+            Executor::Only(addr) if addr != &sender => Err(ContractError::Unauthorized {}),
+            Executor::Members => {
+                let power = get_voting_power(deps, sender, dao, None)?;
+                if power.is_zero() {
+                    Err(ContractError::Unauthorized {})
+                } else {
+                    Ok(())
+                }
+            }
             Executor::Only(_) | Executor::Anyone => Ok(()),
         }
     }

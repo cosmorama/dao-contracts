@@ -234,12 +234,11 @@ pub fn execute_execute(
     proposal_id: u64,
 ) -> Result<Response, ContractError> {
     let config = CONFIG.load(deps.storage)?;
-    if config.only_members_execute {
-        let power = get_voting_power(deps.as_ref(), info.sender.clone(), config.dao.clone(), None)?;
-        if power.is_zero() {
-            return Err(ContractError::Unauthorized {});
-        }
-    }
+
+    // check permission of sender
+    config
+        .executor
+        .authorize(deps.as_ref(), config.dao.clone(), info.sender.clone())?;
 
     let mut prop = PROPOSALS
         .may_load(deps.storage, proposal_id)?
