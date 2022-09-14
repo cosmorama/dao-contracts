@@ -1,6 +1,6 @@
 [package]
 name = "cw20-staked-balance-voting"
-version = "0.1.0"
+version = "1.1.0"
 authors = ["Callum Anderson <callumanderson745@gmail.com>"]
 edition = "2018"
 
@@ -41,7 +41,7 @@ thiserror = { version = "1.0" }
 cw-core-macros = { version = "*", path = "../../packages/cw-core-macros" }
 cw-core-interface = { version = "*", path = "../../packages/cw-core-interface" }
 cw20-stake = { path = "../cw20-stake" }
-cw20-base = {  version = "0.13", features = ["library"] }
+cw20-base = { version = "0.13", features = ["library"] }
 
 [dev-dependencies]
 cosmwasm-schema = { version = "1.0.0" }

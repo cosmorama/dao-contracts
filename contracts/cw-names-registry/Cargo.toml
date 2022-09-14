@@ -1,6 +1,6 @@
 [package]
 name = "cw-names-registry"
-version = "0.1.0"
+version = "1.1.0"
 authors = ["Callum Anderson <callumanderson745@gmail.com>"]
 edition = "2018"
 
@@ -42,4 +42,4 @@ thiserror = { version = "1.0" }
 [dev-dependencies]
 cosmwasm-schema = { version = "1.0.0" }
 cw-multi-test = "0.13"
-anyhow = { version = "1.0.51"}
+anyhow = { version = "1.0.51" }

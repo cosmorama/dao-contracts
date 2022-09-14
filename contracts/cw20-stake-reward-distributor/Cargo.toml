@@ -1,6 +1,6 @@
 [package]
 name = "stake-cw20-reward-distributor"
-version = "0.1.0"
+version = "1.1.0"
 edition = "2018"
 authors = ["Vernon Johnson <vtj2105@columbia.edu>"]
 
@@ -36,8 +36,8 @@ cw2 = "0.13"
 cw20 = { version = "0.13" }
 cw-utils = "0.13"
 schemars = "0.8"
-cw20-base = {  version = "0.13", features = ["library"] }
-cw20-stake = { path = "../cw20-stake", features = ["library"]}
+cw20-base = { version = "0.13", features = ["library"] }
+cw20-stake = { path = "../cw20-stake", features = ["library"] }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 thiserror = { version = "1.0" }
 
