@@ -110,10 +110,9 @@ fn instantiate_with_staked_balances_voting() {
                 },
                 max_voting_period: Duration::Height(10u64),
                 min_voting_period: None,
-                only_members_execute: true,
                 allow_revoting: false,
                 deposit_info: None,
-                executor: crate::state::Executor::Anyone,
+                executor: crate::state::Executor::Members,
             })
             .unwrap(),
         }],

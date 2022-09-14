@@ -137,7 +137,6 @@ fn test_counters() {
         threshold,
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         deposit_info: None,
         executor: cw_proposal_single::state::Executor::Anyone,
