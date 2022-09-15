@@ -1603,11 +1603,11 @@ fn test_single_executor_execute() {
         },
         Some(vec![
             Cw20Coin {
-                address: "ekez".to_string(),
+                address: "member".to_string(),
                 amount: Uint128::new(10),
             },
             Cw20Coin {
-                address: "inactive".to_string(),
+                address: "inactivemember".to_string(),
                 amount: Uint128::new(90),
             },
         ]),
@@ -1624,7 +1624,7 @@ fn test_single_executor_execute() {
 
     // create proposal
     app.execute_contract(
-        Addr::unchecked("ekez"),
+        Addr::unchecked("member"),
         proposal_single.clone(),
         &ExecuteMsg::Propose {
             title: "I will execute this proposal.".to_string(),
@@ -1637,7 +1637,7 @@ fn test_single_executor_execute() {
 
     // vote for proposal
     app.execute_contract(
-        Addr::unchecked("ekez"),
+        Addr::unchecked("member"),
         proposal_single.clone(),
         &ExecuteMsg::Vote {
             proposal_id: 1,
@@ -1650,7 +1650,7 @@ fn test_single_executor_execute() {
     // try to execute it (should fail)
     let err = app
         .execute_contract(
-            Addr::unchecked("ekez"),
+            Addr::unchecked("member"),
             proposal_single.clone(),
             &ExecuteMsg::Execute { proposal_id: 1 },
             &[],
@@ -1695,11 +1695,11 @@ fn text_members_execute() {
         },
         Some(vec![
             Cw20Coin {
-                address: "ekez".to_string(),
+                address: "member1".to_string(),
                 amount: Uint128::new(70),
             },
             Cw20Coin {
-                address: "abcd".to_string(),
+                address: "member2".to_string(),
                 amount: Uint128::new(40),
             },
         ]),
@@ -1716,7 +1716,7 @@ fn text_members_execute() {
 
     // create proposal
     app.execute_contract(
-        Addr::unchecked("ekez"),
+        Addr::unchecked("member1"),
         proposal_single.clone(),
         &ExecuteMsg::Propose {
             title: "I will execute this proposal.".to_string(),
@@ -1729,7 +1729,7 @@ fn text_members_execute() {
 
     // vote for proposal
     app.execute_contract(
-        Addr::unchecked("ekez"),
+        Addr::unchecked("member1"),
         proposal_single.clone(),
         &ExecuteMsg::Vote {
             proposal_id: 1,
@@ -1742,7 +1742,7 @@ fn text_members_execute() {
     // try to execute it as outsider (should fail)
     let err = app
         .execute_contract(
-            Addr::unchecked("asdf"),
+            Addr::unchecked("nonmember"),
             proposal_single.clone(),
             &ExecuteMsg::Execute { proposal_id: 1 },
             &[],
@@ -1754,7 +1754,7 @@ fn text_members_execute() {
 
     // execute as member
     app.execute_contract(
-        Addr::unchecked("abcd"),
+        Addr::unchecked("member2"),
         proposal_single.clone(),
         &ExecuteMsg::Execute { proposal_id: 1 },
         &[],
