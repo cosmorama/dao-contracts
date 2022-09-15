@@ -21,8 +21,8 @@ use crate::{
     query::ProposalListResponse,
     query::{ProposalResponse, VoteInfo, VoteListResponse, VoteResponse},
     state::{
-        get_deposit_msg, get_return_deposit_msg, Ballot, Config, BALLOTS, CONFIG, PROPOSALS,
-        PROPOSAL_COUNT, PROPOSAL_HOOKS, VOTE_HOOKS,
+        get_deposit_msg, get_return_deposit_msg, Ballot, Config, Executor, BALLOTS, CONFIG,
+        PROPOSALS, PROPOSAL_COUNT, PROPOSAL_HOOKS, VOTE_HOOKS,
     },
     utils::{get_total_power, get_voting_power, validate_voting_period},
 };
@@ -58,10 +58,10 @@ pub fn instantiate(
         threshold: msg.threshold,
         max_voting_period,
         min_voting_period,
-        only_members_execute: msg.only_members_execute,
         dao: dao.clone(),
         deposit_info,
         allow_revoting: msg.allow_revoting,
+        executor: msg.executor,
     };
 
     // Initialize proposal count to zero so that queries return zero
@@ -94,20 +94,20 @@ pub fn execute(
             threshold,
             max_voting_period,
             min_voting_period,
-            only_members_execute,
             allow_revoting,
             dao,
             deposit_info,
+            executor,
         } => execute_update_config(
             deps,
             info,
             threshold,
             max_voting_period,
             min_voting_period,
-            only_members_execute,
             allow_revoting,
             dao,
             deposit_info,
+            executor,
         ),
         ExecuteMsg::AddProposalHook { address } => {
             execute_add_proposal_hook(deps, env, info, address)
@@ -231,12 +231,11 @@ pub fn execute_execute(
     proposal_id: u64,
 ) -> Result<Response, ContractError> {
     let config = CONFIG.load(deps.storage)?;
-    if config.only_members_execute {
-        let power = get_voting_power(deps.as_ref(), info.sender.clone(), config.dao.clone(), None)?;
-        if power.is_zero() {
-            return Err(ContractError::Unauthorized {});
-        }
-    }
+
+    // check permission of sender
+    config
+        .executor
+        .authorize(deps.as_ref(), config.dao.clone(), info.sender.clone())?;
 
     let mut prop = PROPOSALS
         .may_load(deps.storage, proposal_id)?
@@ -432,10 +431,10 @@ pub fn execute_update_config(
     threshold: Threshold,
     max_voting_period: Duration,
     min_voting_period: Option<Duration>,
-    only_members_execute: bool,
     allow_revoting: bool,
     dao: String,
     deposit_info: Option<DepositInfo>,
+    executor: Executor,
 ) -> Result<Response, ContractError> {
     let config = CONFIG.load(deps.storage)?;
 
@@ -459,10 +458,10 @@ pub fn execute_update_config(
             threshold,
             max_voting_period,
             min_voting_period,
-            only_members_execute,
             allow_revoting,
             dao,
             deposit_info,
+            executor,
         },
     )?;
 

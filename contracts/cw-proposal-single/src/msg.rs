@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use cw_core_macros::govmod_query;
 use voting::Threshold;
 
+use crate::state::Executor;
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
 pub struct InstantiateMsg {
     /// The threshold a proposal must reach to complete.
@@ -19,10 +21,6 @@ pub struct InstantiateMsg {
     /// preventing governance attacks wherein an attacker aquires a
     /// large number of tokens and forces a proposal through.
     pub min_voting_period: Option<Duration>,
-    /// If set to true only members may execute passed
-    /// proposals. Otherwise, any address may execute a passed
-    /// proposal.
-    pub only_members_execute: bool,
     /// Allows changing votes before the proposal expires. If this is
     /// enabled proposals will not be able to complete early as final
     /// vote information is not known until the time of proposal
@@ -32,6 +30,8 @@ pub struct InstantiateMsg {
     /// proposal. None if there is no deposit requirement, Some
     /// otherwise.
     pub deposit_info: Option<DepositInfo>,
+    /// Specifies who is able to execute proposals
+    pub executor: Executor,
 }
 
 /// Information about the token to use for proposal deposits.
@@ -111,10 +111,6 @@ pub enum ExecuteMsg {
         /// preventing governance attacks wherein an attacker aquires a
         /// large number of tokens and forces a proposal through.
         min_voting_period: Option<Duration>,
-        /// If set to true only members may execute passed
-        /// proposals. Otherwise, any address may execute a passed
-        /// proposal. Applies to all outstanding and future proposals.
-        only_members_execute: bool,
         /// Allows changing votes before the proposal expires. If this is
         /// enabled proposals will not be able to complete early as final
         /// vote information is not known until the time of proposal
@@ -126,6 +122,9 @@ pub enum ExecuteMsg {
         /// Information about the deposit required to make a
         /// proposal. None if no deposit, Some otherwise.
         deposit_info: Option<DepositInfo>,
+        /// Specifies who is able to execute proposals.
+        /// Applies to all outstanding and future proposals.
+        executor: Executor,
     },
     AddProposalHook {
         address: String,

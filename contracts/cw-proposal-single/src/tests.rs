@@ -551,9 +551,9 @@ where
         threshold,
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         deposit_info,
+        executor: crate::state::Executor::Anyone,
     };
 
     let governance_addr =
@@ -707,9 +707,9 @@ fn test_propose() {
         threshold: threshold.clone(),
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         deposit_info: None,
+        executor: crate::state::Executor::Anyone,
     };
 
     let governance_addr =
@@ -737,10 +737,10 @@ fn test_propose() {
         threshold: threshold.clone(),
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         dao: governance_addr,
         deposit_info: None,
+        executor: crate::state::Executor::Anyone,
     };
     assert_eq!(config, expected);
 
@@ -795,9 +795,9 @@ fn test_propose_supports_stargate_message() {
         threshold: threshold.clone(),
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         deposit_info: None,
+        executor: crate::state::Executor::Anyone,
     };
 
     let governance_addr =
@@ -965,13 +965,13 @@ fn test_voting_module_token_proposal_deposit_instantiate() {
         threshold,
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         deposit_info: Some(DepositInfo {
             token: DepositToken::VotingModuleToken {},
             deposit: Uint128::new(1),
             refund_failed_proposals: true,
         }),
+        executor: crate::state::Executor::Anyone,
     };
 
     let governance_addr =
@@ -1042,7 +1042,6 @@ fn test_different_token_proposal_deposit() {
         threshold,
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         deposit_info: Some(DepositInfo {
             token: DepositToken::Token {
@@ -1051,6 +1050,7 @@ fn test_different_token_proposal_deposit() {
             deposit: Uint128::new(1),
             refund_failed_proposals: true,
         }),
+        executor: crate::state::Executor::Anyone,
     };
 
     instantiate_with_cw20_balances_governance(&mut app, govmod_id, instantiate, None);
@@ -1099,7 +1099,6 @@ fn test_bad_token_proposal_deposit() {
         threshold,
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         deposit_info: Some(DepositInfo {
             token: DepositToken::Token {
@@ -1108,6 +1107,7 @@ fn test_bad_token_proposal_deposit() {
             deposit: Uint128::new(1),
             refund_failed_proposals: true,
         }),
+        executor: crate::state::Executor::Anyone,
     };
 
     instantiate_with_cw20_balances_governance(&mut app, govmod_id, instantiate, None);
@@ -1126,13 +1126,13 @@ fn test_take_proposal_deposit() {
         threshold,
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         deposit_info: Some(DepositInfo {
             token: DepositToken::VotingModuleToken {},
             deposit: Uint128::new(1),
             refund_failed_proposals: true,
         }),
+        executor: crate::state::Executor::Anyone,
     };
 
     let governance_addr = instantiate_with_cw20_balances_governance(
@@ -1476,9 +1476,9 @@ fn test_execute_expired_proposal() {
             },
             max_voting_period: Duration::Height(10),
             min_voting_period: None,
-            only_members_execute: true,
             allow_revoting: false,
             deposit_info: None,
+            executor: crate::state::Executor::Members,
         },
         Some(vec![
             Cw20Coin {
@@ -1583,6 +1583,191 @@ fn test_execute_expired_proposal() {
 }
 
 #[test]
+fn test_single_executor_execute() {
+    let executor_addr = Addr::unchecked(CREATOR_ADDR);
+    let mut app = App::default();
+    let govmod_id = app.store_code(single_proposal_contract());
+    let core_addr = instantiate_with_staked_balances_governance(
+        &mut app,
+        govmod_id,
+        InstantiateMsg {
+            threshold: Threshold::ThresholdQuorum {
+                threshold: PercentageThreshold::Percent(Decimal::percent(10)),
+                quorum: PercentageThreshold::Percent(Decimal::percent(10)),
+            },
+            max_voting_period: Duration::Height(10),
+            min_voting_period: None,
+            allow_revoting: false,
+            deposit_info: None,
+            executor: crate::state::Executor::Only(executor_addr.clone()),
+        },
+        Some(vec![
+            Cw20Coin {
+                address: "member".to_string(),
+                amount: Uint128::new(10),
+            },
+            Cw20Coin {
+                address: "inactivemember".to_string(),
+                amount: Uint128::new(90),
+            },
+        ]),
+    );
+
+    let gov_state: cw_core::query::DumpStateResponse = app
+        .wrap()
+        .query_wasm_smart(core_addr, &cw_core::msg::QueryMsg::DumpState {})
+        .unwrap();
+    let proposal_modules = gov_state.proposal_modules;
+
+    assert_eq!(proposal_modules.len(), 1);
+    let proposal_single = proposal_modules.into_iter().next().unwrap();
+
+    // create proposal
+    app.execute_contract(
+        Addr::unchecked("member"),
+        proposal_single.clone(),
+        &ExecuteMsg::Propose {
+            title: "I will execute this proposal.".to_string(),
+            description: "What will happen?".to_string(),
+            msgs: vec![],
+        },
+        &[],
+    )
+    .unwrap();
+
+    // vote for proposal
+    app.execute_contract(
+        Addr::unchecked("member"),
+        proposal_single.clone(),
+        &ExecuteMsg::Vote {
+            proposal_id: 1,
+            vote: Vote::Yes,
+        },
+        &[],
+    )
+    .unwrap();
+
+    // try to execute it (should fail)
+    let err = app
+        .execute_contract(
+            Addr::unchecked("member"),
+            proposal_single.clone(),
+            &ExecuteMsg::Execute { proposal_id: 1 },
+            &[],
+        )
+        .unwrap_err()
+        .downcast::<ContractError>()
+        .unwrap();
+    assert!(matches!(err, ContractError::Unauthorized {}));
+
+    // make sure admin can execute
+    app.execute_contract(
+        executor_addr,
+        proposal_single.clone(),
+        &ExecuteMsg::Execute { proposal_id: 1 },
+        &[],
+    )
+    .unwrap();
+    let proposal: ProposalResponse = app
+        .wrap()
+        .query_wasm_smart(proposal_single, &QueryMsg::Proposal { proposal_id: 1 })
+        .unwrap();
+    assert_eq!(proposal.proposal.status, Status::Executed);
+}
+
+#[test]
+fn text_members_execute() {
+    let mut app = App::default();
+    let govmod_id = app.store_code(single_proposal_contract());
+    let core_addr = instantiate_with_staked_balances_governance(
+        &mut app,
+        govmod_id,
+        InstantiateMsg {
+            threshold: Threshold::ThresholdQuorum {
+                threshold: PercentageThreshold::Majority {},
+                quorum: PercentageThreshold::Percent(Decimal::percent(10)),
+            },
+            max_voting_period: Duration::Height(10),
+            min_voting_period: None,
+            allow_revoting: false,
+            deposit_info: None,
+            executor: crate::state::Executor::Members,
+        },
+        Some(vec![
+            Cw20Coin {
+                address: "member1".to_string(),
+                amount: Uint128::new(70),
+            },
+            Cw20Coin {
+                address: "member2".to_string(),
+                amount: Uint128::new(40),
+            },
+        ]),
+    );
+
+    let gov_state: cw_core::query::DumpStateResponse = app
+        .wrap()
+        .query_wasm_smart(core_addr, &cw_core::msg::QueryMsg::DumpState {})
+        .unwrap();
+    let proposal_modules = gov_state.proposal_modules;
+
+    assert_eq!(proposal_modules.len(), 1);
+    let proposal_single = proposal_modules.into_iter().next().unwrap();
+
+    // create proposal
+    app.execute_contract(
+        Addr::unchecked("member1"),
+        proposal_single.clone(),
+        &ExecuteMsg::Propose {
+            title: "I will execute this proposal.".to_string(),
+            description: "What will happen?".to_string(),
+            msgs: vec![],
+        },
+        &[],
+    )
+    .unwrap();
+
+    // vote for proposal
+    app.execute_contract(
+        Addr::unchecked("member1"),
+        proposal_single.clone(),
+        &ExecuteMsg::Vote {
+            proposal_id: 1,
+            vote: Vote::Yes,
+        },
+        &[],
+    )
+    .unwrap();
+
+    // try to execute it as outsider (should fail)
+    let err = app
+        .execute_contract(
+            Addr::unchecked("nonmember"),
+            proposal_single.clone(),
+            &ExecuteMsg::Execute { proposal_id: 1 },
+            &[],
+        )
+        .unwrap_err()
+        .downcast::<ContractError>()
+        .unwrap();
+    assert!(matches!(err, ContractError::Unauthorized {}));
+
+    // execute as member
+    app.execute_contract(
+        Addr::unchecked("member2"),
+        proposal_single.clone(),
+        &ExecuteMsg::Execute { proposal_id: 1 },
+        &[],
+    )
+    .unwrap();
+    let proposal: ProposalResponse = app
+        .wrap()
+        .query_wasm_smart(proposal_single, &QueryMsg::Proposal { proposal_id: 1 })
+        .unwrap();
+    assert_eq!(proposal.proposal.status, Status::Executed);
+}
+
+#[test]
 fn test_update_config() {
     let (mut app, governance_addr) = do_test_votes_cw20_balances(
         vec![TestVote {
@@ -1637,10 +1822,10 @@ fn test_update_config() {
             },
             max_voting_period: cw_utils::Duration::Height(10),
             min_voting_period: None,
-            only_members_execute: false,
             allow_revoting: false,
             dao: CREATOR_ADDR.to_string(),
             deposit_info: None,
+            executor: crate::state::Executor::Anyone,
         },
         &[],
     )
@@ -1656,10 +1841,10 @@ fn test_update_config() {
             },
             max_voting_period: cw_utils::Duration::Height(10),
             min_voting_period: None,
-            only_members_execute: false,
             allow_revoting: false,
             dao: CREATOR_ADDR.to_string(),
             deposit_info: None,
+            executor: crate::state::Executor::Anyone,
         },
         &[],
     )
@@ -1676,10 +1861,10 @@ fn test_update_config() {
         },
         max_voting_period: cw_utils::Duration::Height(10),
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         dao: Addr::unchecked(CREATOR_ADDR),
         deposit_info: None,
+        executor: crate::state::Executor::Anyone,
     };
     assert_eq!(govmod_config, expected);
 
@@ -1694,10 +1879,10 @@ fn test_update_config() {
             },
             max_voting_period: cw_utils::Duration::Height(10),
             min_voting_period: None,
-            only_members_execute: false,
             allow_revoting: false,
             dao: CREATOR_ADDR.to_string(),
             deposit_info: None,
+            executor: crate::state::Executor::Anyone,
         },
         &[],
     )
@@ -1777,9 +1962,9 @@ fn test_query_list_proposals() {
             },
             max_voting_period: cw_utils::Duration::Height(100),
             min_voting_period: None,
-            only_members_execute: true,
             allow_revoting: false,
             deposit_info: None,
+            executor: crate::state::Executor::Members,
         },
         Some(vec![Cw20Coin {
             address: CREATOR_ADDR.to_string(),
@@ -1926,9 +2111,9 @@ fn test_hooks() {
         threshold,
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         deposit_info: None,
+        executor: crate::state::Executor::Anyone,
     };
 
     let governance_addr =
@@ -2100,9 +2285,9 @@ fn test_active_threshold_absolute() {
         threshold,
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         deposit_info: None,
+        executor: crate::state::Executor::Anyone,
     };
 
     let governance_addr = instantiate_with_staking_active_threshold(
@@ -2226,9 +2411,9 @@ fn test_active_threshold_percent() {
         threshold,
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         deposit_info: None,
+        executor: crate::state::Executor::Anyone,
     };
 
     // 20% needed to be active, 20% of 100000000 is 20000000
@@ -2353,9 +2538,9 @@ fn test_active_threshold_none() {
         threshold,
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         deposit_info: None,
+        executor: crate::state::Executor::Anyone,
     };
 
     let governance_addr =
@@ -2432,9 +2617,9 @@ fn test_active_threshold_none() {
         threshold,
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         deposit_info: None,
+        executor: crate::state::Executor::Anyone,
     };
 
     let governance_addr =
@@ -2483,9 +2668,9 @@ fn test_revoting() {
             },
             max_voting_period: Duration::Height(10),
             min_voting_period: None,
-            only_members_execute: true,
             allow_revoting: true,
             deposit_info: None,
+            executor: crate::state::Executor::Members,
         },
         Some(vec![
             Cw20Coin {
@@ -2609,9 +2794,9 @@ fn test_allow_revoting_config_changes() {
             },
             max_voting_period: Duration::Height(10),
             min_voting_period: None,
-            only_members_execute: true,
             allow_revoting: true,
             deposit_info: None,
+            executor: crate::state::Executor::Members,
         },
         Some(vec![
             Cw20Coin {
@@ -2655,9 +2840,9 @@ fn test_allow_revoting_config_changes() {
             },
             max_voting_period: Duration::Height(10),
             min_voting_period: None,
-            only_members_execute: true,
             allow_revoting: false,
             deposit_info: None,
+            executor: crate::state::Executor::Members,
             dao: core_addr.to_string(),
         },
         &[],
@@ -2752,9 +2937,9 @@ fn test_revoting_same_vote_twice() {
             },
             max_voting_period: Duration::Height(10),
             min_voting_period: None,
-            only_members_execute: true,
             allow_revoting: true,
             deposit_info: None,
+            executor: crate::state::Executor::Members,
         },
         Some(vec![
             Cw20Coin {
@@ -2854,9 +3039,9 @@ fn test_three_of_five_multisig() {
             },
             max_voting_period: Duration::Height(10),
             min_voting_period: None,
-            only_members_execute: true,
             allow_revoting: false,
             deposit_info: None,
+            executor: crate::state::Executor::Members,
         },
         Some(vec![
             Cw20Coin {
@@ -2980,9 +3165,9 @@ fn test_three_of_five_multisig_reject() {
             },
             max_voting_period: Duration::Height(10),
             min_voting_period: None,
-            only_members_execute: true,
             allow_revoting: false,
             deposit_info: None,
+            executor: crate::state::Executor::Members,
         },
         Some(vec![
             Cw20Coin {
@@ -3112,13 +3297,13 @@ fn test_voting_module_token_with_multisig_style_voting() {
             },
             max_voting_period: Duration::Height(10),
             min_voting_period: None,
-            only_members_execute: true,
             allow_revoting: false,
             deposit_info: Some(DepositInfo {
                 token: DepositToken::VotingModuleToken {},
                 deposit: Uint128::new(1),
                 refund_failed_proposals: true,
             }),
+            executor: crate::state::Executor::Members,
         },
         Some(vec![
             Cw20Coin {
@@ -3151,9 +3336,9 @@ fn test_three_of_five_multisig_revoting() {
             },
             max_voting_period: Duration::Height(10),
             min_voting_period: None,
-            only_members_execute: true,
             allow_revoting: true,
             deposit_info: None,
+            executor: crate::state::Executor::Members,
         },
         Some(vec![
             Cw20Coin {
@@ -3384,9 +3569,9 @@ fn test_migrate() {
         threshold,
         max_voting_period,
         min_voting_period: None,
-        only_members_execute: false,
         allow_revoting: false,
         deposit_info: None,
+        executor: crate::state::Executor::Anyone,
     };
 
     let governance_addr =
@@ -3442,9 +3627,9 @@ fn test_proposal_count_initialized_to_zero() {
             },
             max_voting_period: Duration::Height(10),
             min_voting_period: None,
-            only_members_execute: true,
             allow_revoting: false,
             deposit_info: None,
+            executor: crate::state::Executor::Members,
         },
         Some(vec![
             Cw20Coin {
@@ -3488,9 +3673,9 @@ fn test_no_early_pass_with_min_duration() {
             },
             max_voting_period: Duration::Height(10),
             min_voting_period: Some(Duration::Height(2)),
-            only_members_execute: true,
             allow_revoting: false,
             deposit_info: None,
+            executor: crate::state::Executor::Members,
         },
         Some(vec![
             Cw20Coin {
@@ -3576,9 +3761,9 @@ fn test_min_duration_units_missmatch() {
             },
             max_voting_period: Duration::Height(10),
             min_voting_period: Some(Duration::Time(2)),
-            only_members_execute: true,
             allow_revoting: false,
             deposit_info: None,
+            executor: crate::state::Executor::Members,
         },
         Some(vec![
             Cw20Coin {
@@ -3608,9 +3793,9 @@ fn test_min_duration_larger_than_proposal_duration() {
             },
             max_voting_period: Duration::Height(10),
             min_voting_period: Some(Duration::Height(11)),
-            only_members_execute: true,
             allow_revoting: false,
             deposit_info: None,
+            executor: crate::state::Executor::Members,
         },
         Some(vec![
             Cw20Coin {
@@ -3639,9 +3824,9 @@ fn test_min_duration_same_as_proposal_duration() {
             },
             max_voting_period: Duration::Time(10),
             min_voting_period: Some(Duration::Time(10)),
-            only_members_execute: true,
             allow_revoting: false,
             deposit_info: None,
+            executor: crate::state::Executor::Anyone,
         },
         Some(vec![
             Cw20Coin {
