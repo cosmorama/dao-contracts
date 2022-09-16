@@ -29,8 +29,8 @@ optimize = """docker run --rm -v "$(pwd)":/code \
 """
 
 [dependencies]
-cosmwasm-std = { version = "1.0.0", features = ["ibc3"] }
-cosmwasm-storage = { version = "1.0.0" }
+cosmwasm-std = { version = "1.1.0", features = ["ibc3"] }
+cosmwasm-storage = "1.1.0"
 cw-storage-plus = "0.15.0"
 cw2 = "0.15.0"
 cw-utils = "0.15.0"
@@ -44,7 +44,7 @@ cw-core-macros = { version = "1.1.0", path = "../../packages/cw-core-macros" }
 cw-paginate = { version = "1.1.0", path = "../../packages/cw-paginate" }
 
 [dev-dependencies]
-cosmwasm-schema = { version = "1.0.0" }
+cosmwasm-schema = "1.1.0"
 # TODO: We are using the main branch of cw-multi-test until the next release, because we need recent stargate parsing fixes
 cw-multi-test = { git = "https://github.com/CosmWasm/cw-plus", branch = "main", features = [
   "stargate",
