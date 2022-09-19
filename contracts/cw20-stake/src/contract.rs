@@ -28,7 +28,7 @@ pub use cw20_base::contract::{
     execute_upload_logo, query_balance, query_download_logo, query_marketing_info, query_minter,
     query_token_info,
 };
-pub use cw20_base::enumerable::{query_all_accounts, query_all_allowances};
+pub use cw20_base::enumerable::query_all_accounts;
 use cw_controllers::ClaimsResponse;
 use cw_utils::Duration;
 
