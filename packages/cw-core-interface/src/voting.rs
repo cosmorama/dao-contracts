@@ -1,34 +1,32 @@
+use cosmwasm_schema::{QueryResponses, cw_serde};
 use cosmwasm_std::Uint128;
 use cw2::ContractVersion;
 use cw_core_macros::{active_query, token_query, voting_query};
-use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
 
 #[token_query]
 #[voting_query]
 #[active_query]
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
+#[derive(QueryResponses)]
 pub enum Query {}
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct VotingPowerAtHeightResponse {
     pub power: Uint128,
     pub height: u64,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct TotalPowerAtHeightResponse {
     pub power: Uint128,
     pub height: u64,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[cw_serde]
 pub struct InfoResponse {
     pub info: ContractVersion,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+#[cw_serde]
 pub struct IsActiveResponse {
     pub active: bool,
 }

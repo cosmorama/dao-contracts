@@ -1,14 +1,19 @@
 use cw_core_macros::voting_query;
+use cosmwasm_schema::QueryResponses;
 
 /// enum for testing. Important that this derives things / has other
 /// attributes so we can be sure we aren't messing with other macros
 /// with ours.
 #[voting_query]
 #[derive(Clone)]
+#[derive(QueryResponses)]
 #[allow(dead_code)]
 enum Test {
+    #[returns(())]
     Foo,
+    #[returns(())]
     Bar(u64),
+    #[returns(())]
     Baz { foo: u64 },
 }
 

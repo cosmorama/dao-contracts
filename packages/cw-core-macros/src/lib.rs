@@ -59,18 +59,24 @@ pub fn voting_query(metadata: TokenStream, input: TokenStream) -> TokenStream {
     let mut ast: DeriveInput = parse_macro_input!(input);
     match &mut ast.data {
         syn::Data::Enum(DataEnum { variants, .. }) => {
-            let voting_power: Variant = syn::parse2(quote! { VotingPowerAtHeight {
+            let voting_power: Variant = syn::parse2(quote! {
+            #[returns(cw_core_interface::VotingPowerAtHeightResponse)]
+            VotingPowerAtHeight {
                 address: ::std::string::String,
                 height: ::std::option::Option<::std::primitive::u64>
             } })
             .unwrap();
 
-            let total_power: Variant = syn::parse2(quote! { TotalPowerAtHeight {
+            let total_power: Variant = syn::parse2(quote! {
+            #[returns(cw_core_interface::TotalPowerAtHeightResponse)]
+            TotalPowerAtHeight {
                 height: ::std::option::Option<::std::primitive::u64>
             } })
             .unwrap();
 
-            let info: Variant = syn::parse2(quote! { Info {} }).unwrap();
+            let info: Variant = syn::parse2(quote! {
+            #[returns(cw_core_interface::InfoResponse)]
+            Info {} }).unwrap();
 
             variants.push(voting_power);
             variants.push(total_power);
@@ -142,7 +148,9 @@ pub fn token_query(metadata: TokenStream, input: TokenStream) -> TokenStream {
     let mut ast: DeriveInput = parse_macro_input!(input);
     match &mut ast.data {
         syn::Data::Enum(DataEnum { variants, .. }) => {
-            let info: Variant = syn::parse2(quote! { TokenContract {} }).unwrap();
+            let info: Variant = syn::parse2(quote! {
+                #[returns(())]
+                TokenContract {} }).unwrap();
 
             variants.push(info);
         }
@@ -213,7 +221,9 @@ pub fn active_query(metadata: TokenStream, input: TokenStream) -> TokenStream {
     let mut ast: DeriveInput = parse_macro_input!(input);
     match &mut ast.data {
         syn::Data::Enum(DataEnum { variants, .. }) => {
-            let info: Variant = syn::parse2(quote! { IsActive {} }).unwrap();
+            let info: Variant = syn::parse2(quote! {
+                #[returns(cw_core_interface::IsActiveResponse)]
+                IsActive {} }).unwrap();
 
             variants.push(info);
         }
