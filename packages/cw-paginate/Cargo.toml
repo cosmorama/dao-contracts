@@ -8,8 +8,8 @@ edition = "2021"
 [dependencies]
 cosmwasm-std = "1.1.0"
 cosmwasm-storage = "1.1.0"
-cw-storage-plus = "0.15.0"
+cw-storage-plus = "0.16"
 serde = { version = "1.0", default-features = false }
 
 [dev-dependencies]
-cw-multi-test = "0.15.0"
+cw-multi-test = "0.16"
