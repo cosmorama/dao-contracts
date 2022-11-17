@@ -1,6 +1,6 @@
 [package]
 name = "proposal-hooks"
-version = "1.1.0"
+version = "1.1.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -8,5 +8,5 @@ edition = "2021"
 [dependencies]
 schemars = "0.8"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
-cosmwasm-std = "1.1.0"
-indexable-hooks = { version = "1.1.0", path = "../indexable-hooks" }
+cosmwasm-std = "1.1"
+indexable-hooks = { version = "1.1.1", path = "../indexable-hooks" }

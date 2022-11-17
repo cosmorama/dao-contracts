@@ -210,7 +210,7 @@ dependencies = [
 
 [[package]]
 name = "cw-core"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
@@ -235,7 +235,7 @@ dependencies = [
 
 [[package]]
 name = "cw-core-interface"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
@@ -247,7 +247,7 @@ dependencies = [
 
 [[package]]
 name = "cw-core-macros"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-schema",
  "proc-macro2",
@@ -295,7 +295,7 @@ dependencies = [
 
 [[package]]
 name = "cw-named-groups"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
@@ -310,7 +310,7 @@ dependencies = [
 
 [[package]]
 name = "cw-names-registry"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "anyhow",
  "cosmwasm-schema",
@@ -328,7 +328,7 @@ dependencies = [
 
 [[package]]
 name = "cw-paginate"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-std",
  "cosmwasm-storage",
@@ -339,7 +339,7 @@ dependencies = [
 
 [[package]]
 name = "cw-proposal-single"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
@@ -372,7 +372,7 @@ dependencies = [
 
 [[package]]
 name = "cw-proposal-sudo"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
@@ -462,7 +462,7 @@ dependencies = [
 
 [[package]]
 name = "cw20-balance-voting"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
@@ -500,7 +500,7 @@ dependencies = [
 
 [[package]]
 name = "cw20-stake"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "anyhow",
  "cosmwasm-schema",
@@ -520,7 +520,7 @@ dependencies = [
 
 [[package]]
 name = "cw20-staked-balance-voting"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
@@ -585,7 +585,7 @@ dependencies = [
 
 [[package]]
 name = "cw4-voting"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
@@ -809,7 +809,7 @@ dependencies = [
 
 [[package]]
 name = "indexable-hooks"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-std",
  "cw-storage-plus 0.16.0",
@@ -884,7 +884,7 @@ dependencies = [
 
 [[package]]
 name = "proposal-hooks"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-std",
  "indexable-hooks",
@@ -894,7 +894,7 @@ dependencies = [
 
 [[package]]
 name = "proposal-hooks-counter"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
@@ -1146,7 +1146,7 @@ dependencies = [
 
 [[package]]
 name = "stake-cw20-external-rewards"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "anyhow",
  "cosmwasm-schema",
@@ -1167,7 +1167,7 @@ dependencies = [
 
 [[package]]
 name = "stake-cw20-reward-distributor"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-schema",
  "cosmwasm-std",
@@ -1209,7 +1209,7 @@ dependencies = [
 
 [[package]]
 name = "testing"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-std",
  "cw-multi-test 0.16.0",
@@ -1269,7 +1269,7 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "vote-hooks"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-std",
  "indexable-hooks",
@@ -1279,7 +1279,7 @@ dependencies = [
 
 [[package]]
 name = "voting"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "cosmwasm-std",
  "schemars",

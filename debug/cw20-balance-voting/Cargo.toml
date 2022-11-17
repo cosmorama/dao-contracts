@@ -1,6 +1,6 @@
 [package]
 name = "cw20-balance-voting"
-version = "1.1.0"
+version = "1.1.1"
 authors = ["Zeke Medley <zekemedley@gmail.com>"]
 edition = "2018"
 
@@ -29,8 +29,8 @@ optimize = """docker run --rm -v "$(pwd)":/code \
 """
 
 [dependencies]
-cosmwasm-std = "1.1.0"
-cosmwasm-storage = "1.1.0"
+cosmwasm-std = "1.1"
+cosmwasm-storage = "1.1"
 cw-storage-plus = "0.16"
 cw2 = "0.16"
 cw20 = "0.16"
@@ -38,10 +38,10 @@ cw-utils = "0.16"
 schemars = "0.8"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 thiserror = "1"
-cw-core-macros = { version = "1.1.0", path = "../../packages/cw-core-macros" }
-cw-core-interface = { version = "1.1.0", path = "../../packages/cw-core-interface" }
+cw-core-macros = { version = "1.1.1", path = "../../packages/cw-core-macros" }
+cw-core-interface = { version = "1.1.1", path = "../../packages/cw-core-interface" }
 cw20-base = { version = "0.16", features = ["library"] }
 
 [dev-dependencies]
-cosmwasm-schema = "1.1.0"
+cosmwasm-schema = "1.1"
 cw-multi-test = "0.16"
