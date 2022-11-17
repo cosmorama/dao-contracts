@@ -250,6 +250,7 @@ name = "cw-core-macros"
 version = "1.1.0"
 dependencies = [
  "cosmwasm-schema",
+ "cw-core-interface",
  "proc-macro2",
  "quote",
  "schemars",
