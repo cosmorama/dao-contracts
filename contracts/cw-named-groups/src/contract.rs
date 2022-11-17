@@ -199,11 +199,7 @@ fn query_dump(deps: Deps) -> StdResult<DumpResponse> {
         .group_names
         .keys(deps.storage, None, None, Order::Ascending)
     {
-        if let Err(e) = group {
-            return Err(e);
-        }
-
-        let name = group.unwrap();
+        let name = group?;
         let addrs = GROUPS
             .groups_to_addresses
             .prefix(&name)
