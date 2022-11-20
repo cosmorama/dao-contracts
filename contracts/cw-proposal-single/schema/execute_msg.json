@@ -130,8 +130,8 @@
           "required": [
             "allow_revoting",
             "dao",
+            "executor",
             "max_voting_period",
-            "only_members_execute",
             "threshold"
           ],
           "properties": {
@@ -154,6 +154,14 @@
                 }
               ]
             },
+            "executor": {
+              "description": "Specifies who is able to execute proposals. Applies to all outstanding and future proposals.",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Executor"
+                }
+              ]
+            },
             "max_voting_period": {
               "description": "The default maximum amount of time a proposal may be voted on before expiring. This will only apply to proposals created after the config update.",
               "allOf": [
@@ -172,10 +180,6 @@
                   "type": "null"
                 }
               ]
-            },
-            "only_members_execute": {
-              "description": "If set to true only members may execute passed proposals. Otherwise, any address may execute a passed proposal. Applies to all outstanding and future proposals.",
-              "type": "boolean"
             },
             "threshold": {
               "description": "The new proposal passing threshold. This will only apply to proposals created after the config update.",
@@ -272,6 +276,10 @@
     }
   ],
   "definitions": {
+    "Addr": {
+      "description": "A human readable address.\n\nIn Cosmos, this is typically bech32 encoded. But for multi-chain smart contracts no assumptions should be made other than being UTF-8 encoded and of reasonable length.\n\nThis type represents a validated address. It can be created in the following ways 1. Use `Addr::unchecked(input)` 2. Use `let checked: Addr = deps.api.addr_validate(input)?` 3. Use `let checked: Addr = deps.api.addr_humanize(canonical_addr)?` 4. Deserialize from JSON. This must only be done from JSON that was validated before such as a contract's state. `Addr` must not be used in messages sent by the user because this would result in unvalidated instances.\n\nThis type is immutable. If you really need to mutate it (Really? Are you sure?), create a mutable copy using `let mut mutable = Addr::to_string()` and operate on that `String` instance.",
+      "type": "string"
+    },
     "BankMsg": {
       "description": "The message types of the bank module.\n\nSee https://github.com/cosmos/cosmos-sdk/blob/v0.40.0/proto/cosmos/bank/v1beta1/tx.proto",
       "oneOf": [
@@ -330,7 +338,7 @@
       ]
     },
     "Binary": {
-      "description": "Binary is a wrapper around Vec<u8> to add base64 de/serialization with serde. It also adds some helper methods to help encode inline.\n\nThis is only needed as serde-json-{core,wasm} has a horrible encoding for Vec<u8>",
+      "description": "Binary is a wrapper around Vec<u8> to add base64 de/serialization with serde. It also adds some helper methods to help encode inline.\n\nThis is only needed as serde-json-{core,wasm} has a horrible encoding for Vec<u8>. See also <https://github.com/CosmWasm/cosmwasm/blob/main/docs/MESSAGE_TYPES.md>.",
       "type": "string"
     },
     "Coin": {
@@ -621,6 +629,37 @@
     "Empty": {
       "description": "An empty struct that serves as a placeholder in different places, such as contracts that don't set a custom message.\n\nIt is designed to be expressable in correct JSON and JSON Schema but contains no meaningful data. Previously we used enums without cases, but those cannot represented as valid JSON Schema (https://github.com/CosmWasm/cosmwasm/issues/451)",
       "type": "object"
+    },
+    "Executor": {
+      "oneOf": [
+        {
+          "description": "Only the specified address can execute approved proposals",
+          "type": "object",
+          "required": [
+            "Only"
+          ],
+          "properties": {
+            "Only": {
+              "$ref": "#/definitions/Addr"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "All members can execute approved proposals",
+          "type": "string",
+          "enum": [
+            "Members"
+          ]
+        },
+        {
+          "description": "Anyone can execute approved proposals",
+          "type": "string",
+          "enum": [
+            "Anyone"
+          ]
+        }
+      ]
     },
     "GovMsg": {
       "oneOf": [
@@ -1010,11 +1049,28 @@
       "type": "string"
     },
     "Vote": {
-      "type": "string",
-      "enum": [
-        "yes",
-        "no",
-        "abstain"
+      "oneOf": [
+        {
+          "description": "Marks support for the proposal.",
+          "type": "string",
+          "enum": [
+            "yes"
+          ]
+        },
+        {
+          "description": "Marks opposition to the proposal.",
+          "type": "string",
+          "enum": [
+            "no"
+          ]
+        },
+        {
+          "description": "Marks participation but does not count towards the ratio of support / opposed.",
+          "type": "string",
+          "enum": [
+            "abstain"
+          ]
+        }
       ]
     },
     "VoteOption": {
