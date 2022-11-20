@@ -1,6 +1,6 @@
 [package]
 name = "testing"
-version = "1.1.0"
+version = "1.1.1"
 edition = "2021"
 
 # This crate depends on multi-test and rand. These are not features in
@@ -11,6 +11,6 @@ edition = "2021"
 # targeting wasm.
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 rand = "0.8"
-cosmwasm-std = "1.1.0"
+cosmwasm-std = "1.1"
 voting = { path = "../voting", version = "*" }
 cw-multi-test = { version = "0.16" }

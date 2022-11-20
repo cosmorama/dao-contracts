@@ -1,6 +1,6 @@
 [package]
 name = "proposal-hooks-counter"
-version = "1.1.0"
+version = "1.1.1"
 authors = ["Callum Anderson <callumanderson745@gmail.com>"]
 edition = "2018"
 
@@ -29,26 +29,26 @@ optimize = """docker run --rm -v "$(pwd)":/code \
 """
 
 [dependencies]
-cosmwasm-std = "1.1.0"
-cosmwasm-storage = "1.1.0"
+cosmwasm-std = "1.1"
+cosmwasm-storage = "1.1"
 cw-storage-plus = "0.16"
 cw2 = "0.16"
 schemars = "0.8"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 thiserror = "1.0"
-proposal-hooks = { version = "1.1.0", path = "../../packages/proposal-hooks" }
-vote-hooks = { version = "1.1.0", path = "../../packages/vote-hooks" }
+proposal-hooks = { version = "1.1.1", path = "../../packages/proposal-hooks" }
+vote-hooks = { version = "1.1.1", path = "../../packages/vote-hooks" }
 
 [dev-dependencies]
-indexable-hooks = { version = "1.1.0", path = "../../packages/indexable-hooks" }
+indexable-hooks = { version = "1.1.1", path = "../../packages/indexable-hooks" }
 cw20 = "0.16"
-cw20-balance-voting = { path = "../cw20-balance-voting", version = "1.1.0" }
+cw20-balance-voting = { path = "../cw20-balance-voting", version = "1.1.1" }
 cw20-base = "0.16"
 cw-utils = "0.16"
-voting = { version = "1.1.0", path = "../../packages/voting" }
-cw-core = { path = "../../contracts/cw-core", version = "1.1.0", features = [
+voting = { version = "1.1.1", path = "../../packages/voting" }
+cw-core = { path = "../../contracts/cw-core", version = "1.1.1", features = [
   "library",
 ] }
 cw-proposal-single = { path = "../../contracts/cw-proposal-single" }
-cosmwasm-schema = "1.1.0"
+cosmwasm-schema = "1.1"
 cw-multi-test = "0.16"

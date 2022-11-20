@@ -57,7 +57,7 @@ pub struct Config {
     pub executor: Executor,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub enum Executor {
     /// Only the specified address can execute approved proposals
     Only(Addr),

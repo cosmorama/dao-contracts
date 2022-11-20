@@ -6,8 +6,8 @@
   "required": [
     "allow_revoting",
     "dao",
+    "executor",
     "max_voting_period",
-    "only_members_execute",
     "threshold"
   ],
   "properties": {
@@ -34,6 +34,14 @@
         }
       ]
     },
+    "executor": {
+      "description": "Specifies who is able to execute proposals",
+      "allOf": [
+        {
+          "$ref": "#/definitions/Executor"
+        }
+      ]
+    },
     "max_voting_period": {
       "description": "The default maximum amount of time a proposal may be voted on before expiring.",
       "allOf": [
@@ -52,10 +60,6 @@
           "type": "null"
         }
       ]
-    },
-    "only_members_execute": {
-      "description": "If set to true only members may execute passed proposals. Otherwise, any address may execute a passed proposal.",
-      "type": "boolean"
     },
     "threshold": {
       "description": "The threshold a proposal must reach to complete.",
@@ -137,6 +141,37 @@
             }
           },
           "additionalProperties": false
+        }
+      ]
+    },
+    "Executor": {
+      "oneOf": [
+        {
+          "description": "Only the specified address can execute approved proposals",
+          "type": "object",
+          "required": [
+            "Only"
+          ],
+          "properties": {
+            "Only": {
+              "$ref": "#/definitions/Addr"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "All members can execute approved proposals",
+          "type": "string",
+          "enum": [
+            "Members"
+          ]
+        },
+        {
+          "description": "Anyone can execute approved proposals",
+          "type": "string",
+          "enum": [
+            "Anyone"
+          ]
         }
       ]
     },
