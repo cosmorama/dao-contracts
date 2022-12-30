@@ -1,10 +1,11 @@
 use anyhow::Result as AnyResult;
 use serde::Serialize;
 
-use crate::msg::MigrateMsg;
+use crate::msg::{GetConfigResponse, MigrateMsg, QueryMsg};
 
 use cosmwasm_std::{Addr, Uint128};
 use cw20::Cw20Coin;
+use cw_controllers::AdminResponse;
 use cw_multi_test::{next_block, App, AppResponse, ContractWrapper, Executor};
 use cw_utils::Duration;
 
@@ -32,11 +33,14 @@ pub fn store_cw20(app: &mut App) -> u64 {
 }
 
 pub fn store_wyndex_staking(app: &mut App) -> u64 {
-    let contract = Box::new(ContractWrapper::new(
-        wyndex_stake::contract::execute,
-        wyndex_stake::contract::instantiate,
-        wyndex_stake::contract::query,
-    ));
+    let contract = Box::new(
+        ContractWrapper::new(
+            wyndex_stake::contract::execute,
+            wyndex_stake::contract::instantiate,
+            wyndex_stake::contract::query,
+        )
+        .with_migrate_empty(wyndex_stake::contract::migrate),
+    );
     app.store_code(contract)
 }
 
@@ -132,9 +136,42 @@ impl Suite {
     }
 }
 
+mod wyndex_stake_helpers {
+    use super::*;
+    use serde::Deserialize;
+
+    #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+    #[serde(rename_all = "snake_case")]
+    pub enum WyndexQueryMsg {
+        Admin {},
+        BondingInfo {},
+    }
+
+    #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+    pub struct BondingPeriodInfo {
+        pub unbonding_period: u64,
+        pub total_staked: Uint128,
+    }
+
+    #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+    pub struct BondingInfoResponse {
+        pub bonding: Vec<BondingPeriodInfo>,
+    }
+}
+
 #[test]
 fn wyndex_base_migration() {
     let mut suite = SuiteBuilder::new().build();
+
+    // make sure original staking contract is what it is by querying config
+    suite
+        .app
+        .wrap()
+        .query_wasm_smart::<GetConfigResponse>(
+            suite.staking_contract.clone(),
+            &QueryMsg::GetConfig {},
+        )
+        .unwrap();
 
     let migrate_msg = MigrateMsg {
         new_admin: Some("wyndex_dao".to_owned()),
@@ -148,5 +185,25 @@ fn wyndex_base_migration() {
     let owner = suite.owner();
     suite
         .migrate(owner.as_str(), suite.wyndex_stake_code_id, &migrate_msg)
+        .unwrap();
+
+    // now the same query won't work, as wyndex stake doesn't have such query
+    suite
+        .app
+        .wrap()
+        .query_wasm_smart::<GetConfigResponse>(
+            suite.staking_contract.clone(),
+            &QueryMsg::GetConfig {},
+        )
+        .unwrap_err();
+
+    // but query specific for wyndex stake will work
+    suite
+        .app
+        .wrap()
+        .query_wasm_smart::<AdminResponse>(
+            suite.staking_contract.clone(),
+            &wyndex_stake_helpers::WyndexQueryMsg::Admin {},
+        )
         .unwrap();
 }
