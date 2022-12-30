@@ -1,24 +1,24 @@
 use anyhow::Result as AnyResult;
+use serde::Serialize;
 
-use crate::msg::{
-    ExecuteMsg, GetConfigResponse, QueryMsg, ReceiveMsg, StakedBalanceAtHeightResponse,
-    StakedValueResponse, TotalStakedAtHeightResponse, TotalValueResponse,
-};
-use crate::ContractError;
+use crate::msg::MigrateMsg;
 
-use cosmwasm_std::{to_binary, Addr, Uint128};
+use cosmwasm_std::{Addr, Uint128};
 use cw20::Cw20Coin;
-use cw_multi_test::{next_block, App, AppResponse, Contract, ContractWrapper, Executor};
+use cw_multi_test::{next_block, App, AppResponse, ContractWrapper, Executor};
 use cw_utils::Duration;
 
-pub const UNBONDING_DURATION: u64 = 86_400 * 14; // two weeks
+pub const ONE_DAY: u64 = 86_400;
 
 pub fn store_staking(app: &mut App) -> u64 {
-    let contract = Box::new(ContractWrapper::new(
-        crate::contract::execute,
-        crate::contract::instantiate,
-        crate::contract::query,
-    ));
+    let contract = Box::new(
+        ContractWrapper::new(
+            crate::contract::execute,
+            crate::contract::instantiate,
+            crate::contract::query,
+        )
+        .with_migrate_empty(crate::contract::migrate),
+    );
     app.store_code(contract)
 }
 
@@ -27,6 +27,15 @@ pub fn store_cw20(app: &mut App) -> u64 {
         cw20_base::contract::execute,
         cw20_base::contract::instantiate,
         cw20_base::contract::query,
+    ));
+    app.store_code(contract)
+}
+
+pub fn store_wyndex_staking(app: &mut App) -> u64 {
+    let contract = Box::new(ContractWrapper::new(
+        wyndex_stake::contract::execute,
+        wyndex_stake::contract::instantiate,
+        wyndex_stake::contract::query,
     ));
     app.store_code(contract)
 }
@@ -77,7 +86,7 @@ impl SuiteBuilder {
                     owner: Some(owner.to_string()),
                     manager: Some("manager".to_string()),
                     token_address: token_contract.to_string(),
-                    unstaking_duration: Some(Duration::Time(UNBONDING_DURATION)),
+                    unstaking_duration: Some(Duration::Time(ONE_DAY * 14)),
                 },
                 &[],
                 "staking",
@@ -86,11 +95,14 @@ impl SuiteBuilder {
             .unwrap();
         app.update_block(next_block);
 
+        let wyndex_stake_code_id = store_wyndex_staking(&mut app);
+
         Suite {
             owner,
             app,
             token_contract,
             staking_contract,
+            wyndex_stake_code_id,
         }
     }
 }
@@ -100,4 +112,41 @@ pub struct Suite {
     pub app: App,
     pub token_contract: Addr,
     pub staking_contract: Addr,
+    pub wyndex_stake_code_id: u64,
+}
+
+impl Suite {
+    pub fn owner(&self) -> Addr {
+        self.owner.clone()
+    }
+
+    pub fn migrate<T: Serialize>(
+        &mut self,
+        sender: &str,
+        code_id: u64,
+        msg: &T,
+    ) -> AnyResult<AppResponse> {
+        let contract = self.staking_contract.clone();
+        self.app
+            .migrate_contract(Addr::unchecked(sender), contract, msg, code_id)
+    }
+}
+
+#[test]
+fn wyndex_base_migration() {
+    let mut suite = SuiteBuilder::new().build();
+
+    let migrate_msg = MigrateMsg {
+        new_admin: Some("wyndex_dao".to_owned()),
+        pool_contract: "pool".to_owned(),
+        tokens_per_power: Uint128::new(1),
+        min_bond: Uint128::new(1),
+        unbonding_periods: vec![ONE_DAY * 5, ONE_DAY & 10, ONE_DAY * 14, ONE_DAY * 20],
+        max_distributions: 6,
+    };
+
+    let owner = suite.owner();
+    suite
+        .migrate(owner.as_str(), suite.wyndex_stake_code_id, &migrate_msg)
+        .unwrap();
 }
